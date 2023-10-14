@@ -14,9 +14,9 @@ type Service struct {
 }
 
 type LoadItem struct {
-	Day     int     `json:"day"`
-	Loads   [][]int `json:"loads"`
-	WorkHrs []int   `json:"workHrs"`
+	Day     int      `json:"day"`
+	Loads   [][2]int `json:"loads"`
+	WorkHrs []int    `json:"workHrs"`
 }
 
 type ATM struct {
@@ -57,9 +57,9 @@ func generateRandomLoad(allDay bool) []LoadItem {
 	}
 
 	for day := 1; day <= 7; day++ {
-		loadDay := make([][]int, 0)
+		loadDay := make([][2]int, 0)
 		for hour := openHour; hour <= closeHour; hour++ {
-			loadHour := []int{hour, (rand.Intn(10) + 1) * (rand.Intn(3) + 1)}
+			loadHour := [2]int{hour, (rand.Intn(10) + 1) * (rand.Intn(3) + 1)}
 			loadDay = append(loadDay, loadHour)
 			workHrs = append(workHrs, hour)
 
