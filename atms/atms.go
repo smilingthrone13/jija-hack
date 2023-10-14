@@ -14,8 +14,9 @@ type Service struct {
 }
 
 type LoadItem struct {
-	Days  string `json:"days"`
-	Loads []int  `json:"loads"`
+	Day     int     `json:"day"`
+	Loads   [][]int `json:"loads"`
+	WorkHrs []int   `json:"workHrs"`
 }
 
 type ATM struct {
@@ -40,20 +41,36 @@ type ATMData struct {
 	ATMs []ATM `json:"atms"`
 }
 
-func generateRandomLoad() []LoadItem {
+func generateRandomLoad(allDay bool) []LoadItem {
 	rand.Seed(time.Now().UnixNano())
-	days := []string{"Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"}
-	var load []LoadItem
+	var (
+		load                []LoadItem
+		workHrs             []int
+		openHour, closeHour int
+	)
 
-	for _, day := range days {
-		loadDay := make([]int, 24)
-		for hour := 9; hour <= 20; hour++ {
-			loadDay[hour] = rand.Intn(10) + 1
+	openHour = 0
+	closeHour = 23
+	if !allDay {
+		openHour = 8
+		closeHour = 22
+	}
+
+	for day := 1; day <= 7; day++ {
+		loadDay := make([][]int, 0)
+		for hour := openHour; hour <= closeHour; hour++ {
+			loadHour := []int{hour, (rand.Intn(10) + 1) * (rand.Intn(3) + 1)}
+			loadDay = append(loadDay, loadHour)
+			workHrs = append(workHrs, hour)
+
 		}
 		load = append(load, LoadItem{
-			Days:  day,
-			Loads: loadDay[9:21], // Ограничиваем часы от 9 до 20 включительно
+			Day:     day,
+			Loads:   loadDay,
+			WorkHrs: workHrs,
 		})
+		workHrs = make([]int, 0)
+
 	}
 
 	return load
@@ -77,7 +94,8 @@ func main() {
 
 	// Заполнение поля "load" случайными значениями
 	for i := range data.ATMs {
-		data.ATMs[i].Load = generateRandomLoad()
+		allDay := data.ATMs[i].AllDay
+		data.ATMs[i].Load = generateRandomLoad(allDay)
 	}
 
 	// Запись обновленных данных обратно в файл
